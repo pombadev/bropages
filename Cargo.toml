@@ -1,10 +1,11 @@
 [package]
 name = "bropages"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["pjmp"]
 edition = "2018"
-keywords = ["cli"]
-categories = ["Command line utilities"]
+keywords = ["cli", "client", "search", "information", "tldr", "cheatsheet"]
+categories = ["command-line-utilities", "command-line-interface"]
+readme = "README.md"
 license = "MIT"
 homepage = "https://github.com/pjmp/bropages"
 repository = "https://github.com/pjmp/bropages"

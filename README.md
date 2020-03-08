@@ -2,7 +2,7 @@ bropages (bro)
 ------------
 A CLI to interact with [bropages.org](http://bropages.org).
 
-Highly readable supplement to man pages. Shows simple, concise examples for commands.
+Highly readable supplement to man pages. Shows simple, concise examples for commands with syntax highlighting.
 
 [![Crates.io](https://img.shields.io/crates/v/bropages)](https://crates.io/crates/bropages)
 ![License](https://img.shields.io/crates/l/bropages)
@@ -47,4 +47,5 @@ ARGS:
 ```
 
 ### TODO:
+ - [ ] Better error handling
  - [ ] Pager support
