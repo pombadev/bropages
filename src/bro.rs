@@ -103,6 +103,11 @@ pub fn paint(snippet: &str) {
         parsing::SyntaxSet,
         util::{as_24_bit_terminal_escaped, LinesWithEndings},
     };
+
+    use std::io::{stdout, BufWriter, Write};
+    let stdout = stdout();
+    let mut writer = BufWriter::new(stdout.lock());
+
     // Available themes:
     // base16-ocean.dark
     // base16-eighties.dark
@@ -117,11 +122,14 @@ pub fn paint(snippet: &str) {
 
     let syntax = ps.find_syntax_by_extension("bash").unwrap();
     let mut h = HighlightLines::new(syntax, &ts.themes["base16-mocha.dark"]);
+    let mut final_string_to_print = String::new();
 
     for line in LinesWithEndings::from(snippet) {
         // LinesWithEndings enables use of newlines mode
         let ranges: Vec<(Style, &str)> = h.highlight(line, &ps);
         let escaped = as_24_bit_terminal_escaped(&ranges[..], false);
-        print!("{}", escaped);
+        final_string_to_print.push_str(escaped.as_str())
     }
+
+    writeln!(&mut writer, "{}", final_string_to_print).unwrap();
 }

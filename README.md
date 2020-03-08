@@ -4,6 +4,9 @@ A CLI to interact with [bropages.org](http://bropages.org).
 
 Highly readable supplement to man pages. Shows simple, concise examples for commands.
 
+[![Crates.io](https://img.shields.io/crates/v/bropages)](https://crates.io/crates/bropages)
+![License](https://img.shields.io/crates/l/bropages)
+
 ### Screenshot
 
 [![A screenshot](./screenshot.png)](./screenshot.png)
@@ -42,3 +45,6 @@ ARGS:
             Command to lookup
 
 ```
+
+### TODO:
+ - [ ] Pager support

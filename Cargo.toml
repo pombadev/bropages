@@ -1,14 +1,17 @@
 [package]
 name = "bropages"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["pjmp"]
 edition = "2018"
+keywords = ["cli"]
+categories = ["Command line utilities"]
+license = "MIT"
+homepage = "https://github.com/pjmp/bropages"
+repository = "https://github.com/pjmp/bropages"
 description = """
 Highly readable supplement to man pages.
 Shows simple, concise examples for commands.
 """
-keywords = ["cli"]
-categories = ["Command line utilities"]
 
 [dependencies]
 reqwest = {version = "0.10.3", default-features = false, features = ["json"]}
