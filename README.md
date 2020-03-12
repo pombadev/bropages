@@ -49,3 +49,5 @@ ARGS:
 ### TODO:
  - [ ] Better error handling
  - [ ] Pager support
+ - [ ] Fuzzy search using [skim](https://github.com/lotabout/skim)
+ - [ ] Cache results
