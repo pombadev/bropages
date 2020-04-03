@@ -1,9 +1,9 @@
 [package]
 name = "bropages"
-version = "0.1.2"
+version = "0.2.2"
 authors = ["pjmp"]
 edition = "2018"
-keywords = ["cli", "client", "tldr", "cheatsheet"]
+keywords = ["bro", "bropages", "client", "tldr", "cheatsheet"]
 categories = ["command-line-utilities", "command-line-interface"]
 readme = "README.md"
 license = "MIT"
@@ -20,6 +20,7 @@ tokio = {version = "0.2.13", features = ["macros"] }
 serde = {version = "1.0.48", features = ["derive"] }
 syntect = {version = "3.3.0", default-features = false, features = ["parsing", "assets", "dump-load"]}
 clap = {version = "2.33.0", features = ["default"] }
+colored = "1.9.3"
 
 [[bin]]
 path = "src/main.rs"

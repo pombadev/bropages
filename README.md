@@ -7,9 +7,9 @@ Highly readable supplement to man pages. Shows simple, concise examples for comm
 [![Crates.io](https://img.shields.io/crates/v/bropages)](https://crates.io/crates/bropages)
 ![License](https://img.shields.io/crates/l/bropages)
 
-### Screenshot
+### Screencast
 
-[![A screenshot](./screenshot.png)](./screenshot.png)
+[![A screenshot](./screencast.gif)](./screencast.gif)
 
 ### Installation
 
@@ -22,16 +22,15 @@ cargo install bropages
 
 ### Available options
 ```
-bropages 0.1.0
-Highly readable supplement to man pages.
-Shows simple, concise examples for commands.
-
 USAGE:
-    bro [FLAGS] <query>
+    bro [OPTIONS] [query]
 
-FLAGS:
+OPTIONS:
     -h, --help
             Prints help information
+
+        --no-color
+            Disable syntax highlighting
 
     -l, --lookup
             Lookup an entry, bro, or just call bro
@@ -43,11 +42,8 @@ FLAGS:
 ARGS:
     <query>
             Command to lookup
-
 ```
 
 ### TODO:
  - [ ] Better error handling
- - [ ] Pager support
- - [ ] Fuzzy search using [skim](https://github.com/lotabout/skim)
  - [ ] Cache results

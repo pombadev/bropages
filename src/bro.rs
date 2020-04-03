@@ -1,8 +1,8 @@
-use clap::{crate_description, crate_name, crate_version, App, AppSettings, Arg};
+use colored::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct BroResponse {
+pub struct BroLookupResponse {
     cmd: String,
     msg: String,
     updated_at: String,
@@ -17,26 +17,26 @@ pub struct BroSearchResponse {
     id: i32,
 }
 
-pub fn get_snippet_from_list(list: Vec<String>) -> String {
+pub fn convert_list_to_string(list: Vec<String>) -> String {
     list.iter().fold(String::new(), |mut acc, item| {
         acc.push_str(format!("{}\n", item).as_str());
         acc
     })
 }
 
-pub async fn lookup(query: &str) {
+pub async fn lookup(query: &str, no_color: bool) {
     let url = format!("http://bropages.org/{}.json", query);
     let response = reqwest::get(&url).await;
 
     // TODO: abstract away error handling, prevent duplicate
     if let Err(error) = response {
-        eprintln!("{}", error.to_string())
+        eprintln!("{}: {}", "error".red(), error.to_string())
     } else if let Ok(response) = response {
-        let response = response.json::<Vec<BroResponse>>().await;
+        let response = response.json::<Vec<BroLookupResponse>>().await;
 
         if let Err(error) = response {
             // println!("{:#?}", error);
-            eprintln!("{}", error.to_string());
+            eprintln!("{}: {}", "error".red(), error.to_string());
         } else if let Ok(mut response) = response {
             response.sort_by(|first, second| second.up.cmp(&first.up));
 
@@ -45,69 +45,63 @@ pub async fn lookup(query: &str) {
                 .map(|item| item.msg.clone())
                 .collect::<Vec<String>>();
 
-            let snippet = get_snippet_from_list(list);
+            let snippet = convert_list_to_string(list);
 
-            paint(snippet.as_str());
+            if no_color {
+                println!("{}", snippet);
+            } else {
+                write_to_stdio(snippet.as_str());
+            }
         }
     }
 }
 
-pub async fn search(query: &str) {
+pub async fn search(query: &str, no_color: bool) {
     let url = format!("http://bropages.org/search/{}.json", query);
     let response = reqwest::get(&url).await;
 
     // TODO: abstract away error handling, prevent duplicate
     if let Err(error) = response {
-        eprintln!("{}", error.to_string())
+        eprintln!("{}: {}", "error".red(), error.to_string())
     } else if let Ok(response) = response {
         let response = response.json::<Vec<BroSearchResponse>>().await;
 
         if let Err(error) = response {
             // println!("{:#?}", error);
-            eprintln!("{}", error.to_string());
+            eprintln!("{}: {}", "error".red(), error.to_string());
         } else if let Ok(response) = response {
             let list = response
                 .iter()
                 .map(|item| item.cmd.clone())
                 .collect::<Vec<String>>();
 
-            let snippet = get_snippet_from_list(list);
+            let total = list.len();
 
-            paint(snippet.as_str());
+            let snippet = format!(
+                "# There {} total '{}' results for the term '{}':\n\n{}",
+                if total > 1 { "are" } else { "is" },
+                total,
+                query,
+                convert_list_to_string(list)
+            );
+
+            if no_color {
+                println!("{}", snippet);
+            } else {
+                write_to_stdio(snippet.as_str());
+            }
         }
     }
 }
 
-pub fn cli() -> App<'static, 'static> {
-    App::new(crate_name!())
-        .version(crate_version!())
-        .about(crate_description!())
-        .settings(&[
-            AppSettings::ArgRequiredElseHelp,
-            AppSettings::ColorAuto,
-        ])
-    .args(&[
-        Arg::with_name("search")
-            .short("l")
-            .long("lookup")
-            .help("Lookup an entry, bro, or just call bro")
-            .long_help("Lookup an entry, bro, or just call bro\nThis looks up entries in the http://bropages.org database."),
-        Arg::from_usage("<query> 'Command to lookup'")
-    ])
-}
-
-pub fn paint(snippet: &str) {
+pub fn write_to_stdio(snippet: &str) {
+    let mut final_string_to_print = String::new();
     use syntect::{
         easy::HighlightLines,
         highlighting::{Style, ThemeSet},
         parsing::SyntaxSet,
         util::{as_24_bit_terminal_escaped, LinesWithEndings},
     };
-
-    use std::io::{stdout, BufWriter, Write};
-    let stdout = stdout();
-    let mut writer = BufWriter::new(stdout.lock());
-
     // Available themes:
     // base16-ocean.dark
     // base16-eighties.dark
@@ -117,19 +111,20 @@ pub fn paint(snippet: &str) {
     // Solarized (dark)
     // Solarized (light)
 
-    let ps = SyntaxSet::load_defaults_newlines();
-    let ts = ThemeSet::load_defaults();
+    let syntax_set = SyntaxSet::load_defaults_newlines();
+    let theme_set = ThemeSet::load_defaults();
 
-    let syntax = ps.find_syntax_by_extension("bash").unwrap();
-    let mut h = HighlightLines::new(syntax, &ts.themes["base16-mocha.dark"]);
-    let mut final_string_to_print = String::new();
+    let syntax = syntax_set
+        .find_syntax_by_extension("bash")
+        .expect("Unable to find syntax definition for `bash`");
+    let mut highlighter = HighlightLines::new(syntax, &theme_set.themes["base16-mocha.dark"]);
 
     for line in LinesWithEndings::from(snippet) {
         // LinesWithEndings enables use of newlines mode
-        let ranges: Vec<(Style, &str)> = h.highlight(line, &ps);
+        let ranges: Vec<(Style, &str)> = highlighter.highlight(line, &syntax_set);
         let escaped = as_24_bit_terminal_escaped(&ranges[..], false);
         final_string_to_print.push_str(escaped.as_str())
     }
 
-    writeln!(&mut writer, "{}", final_string_to_print).unwrap();
+    println!("{}", final_string_to_print.as_str());
 }
