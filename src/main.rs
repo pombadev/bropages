@@ -1,16 +1,31 @@
 mod bro;
+mod cli;
 
 #[tokio::main]
 async fn main() {
-    let args = bro::cli().get_matches();
+    let args = cli::new().get_matches();
 
-    if args.is_present("search") {
-        bro::search(args.value_of("query").unwrap()).await;
+    if !args.is_present("search") && !args.is_present("query") {
+        cli::print_help();
         return;
     }
 
-    if args.is_present("query") {
-        bro::lookup(args.value_of("query").unwrap()).await;
-        return;
+    let no_color = args.is_present("no-color");
+    let search = args.is_present("search");
+    let lookup = args.is_present("query");
+
+    if search || lookup {
+        return match args.value_of("query") {
+            None => {
+                cli::print_help();
+            },
+            Some(val) => {
+                if search {
+                    bro::search(val, no_color).await;
+                } else if lookup {
+                    bro::lookup(val, no_color).await;
+                }
+            },
+        };
     }
 }
