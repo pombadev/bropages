@@ -18,14 +18,14 @@ async fn main() {
         return match args.value_of("query") {
             None => {
                 cli::print_help();
-            },
+            }
             Some(val) => {
                 if search {
                     bro::search(val, no_color).await;
                 } else if lookup {
                     bro::lookup(val, no_color).await;
                 }
-            },
+            }
         };
     }
 }

@@ -17,81 +17,86 @@ pub struct BroSearchResponse {
     id: i32,
 }
 
-pub fn convert_list_to_string(list: Vec<String>) -> String {
+pub fn convert_list_to_string(list: Vec<&String>) -> String {
     list.iter().fold(String::new(), |mut acc, item| {
         acc.push_str(format!("{}\n", item).as_str());
         acc
     })
 }
 
+fn eprint_and_exit(msg: String) {
+    eprintln!("{}: {}", "error".bright_red().bold(), msg);
+    std::process::exit(1);
+}
+
 pub async fn lookup(query: &str, no_color: bool) {
     let url = format!("http://bropages.org/{}.json", query);
-    let response = reqwest::get(&url).await;
 
-    // TODO: abstract away error handling, prevent duplicate
-    if let Err(error) = response {
-        eprintln!("{}: {}", "error".red(), error.to_string())
-    } else if let Ok(response) = response {
-        let response = response.json::<Vec<BroLookupResponse>>().await;
+    match reqwest::get(&url).await {
+        Ok(response) => {
+            let status = response.status();
 
-        if let Err(error) = response {
-            // println!("{:#?}", error);
-            eprintln!("{}: {}", "error".red(), error.to_string());
-        } else if let Ok(mut response) = response {
-            response.sort_by(|first, second| second.up.cmp(&first.up));
+            if status.as_str() == "200" {
+                match response.json::<Vec<BroLookupResponse>>().await {
+                    Ok(res) => {
+                        let list = res.iter().map(|item| &item.msg).collect::<Vec<&String>>();
 
-            let list = response
-                .iter()
-                .map(|item| item.msg.clone())
-                .collect::<Vec<String>>();
+                        let snippet = convert_list_to_string(list);
 
-            let snippet = convert_list_to_string(list);
-
-            if no_color {
-                println!("{}", snippet);
+                        if no_color {
+                            println!("{}", snippet);
+                        } else {
+                            write_to_stdio(snippet.as_str());
+                        }
+                    }
+                    Err(err) => eprint_and_exit(err.to_string()),
+                }
             } else {
-                write_to_stdio(snippet.as_str());
+                eprint_and_exit(format!("{}", status));
             }
         }
-    }
+        // usually network error
+        Err(err) => eprint_and_exit(err.to_string()),
+    };
 }
 
 pub async fn search(query: &str, no_color: bool) {
     let url = format!("http://bropages.org/search/{}.json", query);
-    let response = reqwest::get(&url).await;
 
-    // TODO: abstract away error handling, prevent duplicate
-    if let Err(error) = response {
-        eprintln!("{}: {}", "error".red(), error.to_string())
-    } else if let Ok(response) = response {
-        let response = response.json::<Vec<BroSearchResponse>>().await;
+    match reqwest::get(&url).await {
+        Ok(response) => {
+            let status = response.status();
 
-        if let Err(error) = response {
-            // println!("{:#?}", error);
-            eprintln!("{}: {}", "error".red(), error.to_string());
-        } else if let Ok(response) = response {
-            let list = response
-                .iter()
-                .map(|item| item.cmd.clone())
-                .collect::<Vec<String>>();
+            if status.as_str() == "200" {
+                match response.json::<Vec<BroSearchResponse>>().await {
+                    Ok(res) => {
+                        let list = res.iter().map(|item| &item.cmd).collect::<Vec<&String>>();
 
-            let total = list.len();
+                        let total = list.len();
 
-            let snippet = format!(
-                "# There {} total '{}' results for the term '{}':\n\n{}",
-                if total > 1 { "are" } else { "is" },
-                total,
-                query,
-                convert_list_to_string(list)
-            );
+                        let snippet = format!(
+                            "# There {} total '{}' results for the term '{}':\n\n{}",
+                            if total > 1 { "are" } else { "is" },
+                            total,
+                            query,
+                            convert_list_to_string(list)
+                        );
 
-            if no_color {
-                println!("{}", snippet);
+                        if no_color {
+                            println!("{}", snippet);
+                        } else {
+                            write_to_stdio(snippet.as_str());
+                        }
+                    }
+                    Err(err) => eprint_and_exit(err.to_string()),
+                }
             } else {
-                write_to_stdio(snippet.as_str());
+                eprint_and_exit(format!("{}", status));
             }
         }
-    }
+        // usually network error
+        Err(err) => eprint_and_exit(err.to_string()),
+    };
 }
 
 pub fn write_to_stdio(snippet: &str) {

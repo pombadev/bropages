@@ -1,6 +1,6 @@
 [package]
 name = "bropages"
-version = "0.2.2"
+version = "0.3.0"
 authors = ["pjmp"]
 edition = "2018"
 keywords = ["bro", "bropages", "client", "tldr", "cheatsheet"]
@@ -25,3 +25,8 @@ colored = "1.9.3"
 [[bin]]
 path = "src/main.rs"
 name = "bro"
+
+[profile.release]
+opt-level = 3
+lto = true
+panic = 'abort'
