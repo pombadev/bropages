@@ -26,25 +26,28 @@ USAGE:
     bro [OPTIONS] [query]
 
 OPTIONS:
-    -h, --help
+    -h, --help         
             Prints help information
 
-        --no-color
-            Disable syntax highlighting
+        --no-color     
+            Disable colored output
 
-    -l, --lookup
+        --no-paging    
+            Control piping of the output through a pager
+
+    -l, --lookup       
             Lookup an entry, bro, or just call bro
             This looks up entries in the http://bropages.org database.
-    -V, --version
+    -V, --version      
             Prints version information
 
 
 ARGS:
-    <query>
+    <query>    
             Command to lookup
 ```
 
-### Note:
+### Note
 
 - This is an unofficial rust port of [ruby bropages](https://rubygems.org/gems/bropages).
 - I don't have any intentions to add the `add`, `no`/`...no` or `thanks` commands.

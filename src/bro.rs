@@ -31,7 +31,7 @@ fn format_to_string(list: Vec<String>) -> String {
                     inner_next = format!("\n{}\n", item);
                 }
 
-                Some(String::from(inner_next))
+                Some(inner_next)
             })
             .collect::<String>();
 
@@ -47,7 +47,7 @@ fn eprint_and_exit(msg: String) {
 }
 
 fn fetch<T: serde::de::DeserializeOwned>(path: String) -> Result<Vec<T>, String> {
-    let host = env::var("BROPAGES_BASE_URL").unwrap_or("http://bropages.org".to_string());
+    let host = env::var("BROPAGES_BASE_URL").unwrap_or_else(|_| "http://bropages.org".to_string());
     let url = format!("{}{}", host, path);
 
     match attohttpc::get(url).send() {
