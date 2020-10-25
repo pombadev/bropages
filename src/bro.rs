@@ -1,135 +1,129 @@
-use colored::*;
 use serde::{Deserialize, Serialize};
+use std::{env, process};
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct BroLookupResponse {
+struct BroLookupResponse {
     cmd: String,
     msg: String,
-    updated_at: String,
-    id: i32,
     up: i32,
-    down: i32,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct BroSearchResponse {
+struct BroSearchResponse {
     cmd: String,
-    id: i32,
 }
 
-pub fn convert_list_to_string(list: Vec<&String>) -> String {
-    list.iter().fold(String::new(), |mut acc, item| {
-        acc.push_str(format!("{}\n", item).as_str());
-        acc
+fn format_to_string(list: Vec<String>) -> String {
+    list.iter().fold(String::new(), |mut init, curr| {
+        let splits = curr.split('\n');
+
+        let next = splits
+            .filter_map(|item| {
+                if item.is_empty() {
+                    return None;
+                }
+
+                let inner_next;
+
+                if item.starts_with('#') {
+                    inner_next = format!("\n{}", item);
+                } else {
+                    inner_next = format!("\n{}\n", item);
+                }
+
+                Some(String::from(inner_next))
+            })
+            .collect::<String>();
+
+        init.push_str(next.as_str());
+
+        init
     })
 }
 
 fn eprint_and_exit(msg: String) {
-    eprintln!("{}: {}", "error".bright_red().bold(), msg);
-    std::process::exit(1);
+    eprintln!("Unable to find because of:\n  - {}", msg);
+    process::exit(1);
 }
 
-pub async fn lookup(query: &str, no_color: bool) {
-    let url = format!("http://bropages.org/{}.json", query);
+fn fetch<T: serde::de::DeserializeOwned>(path: String) -> Result<Vec<T>, String> {
+    let host = env::var("BROPAGES_BASE_URL").unwrap_or("http://bropages.org".to_string());
+    let url = format!("{}{}", host, path);
 
-    match reqwest::get(&url).await {
+    match attohttpc::get(url).send() {
         Ok(response) => {
-            let status = response.status();
-
-            if status.as_str() == "200" {
-                match response.json::<Vec<BroLookupResponse>>().await {
-                    Ok(res) => {
-                        let list = res.iter().map(|item| &item.msg).collect::<Vec<&String>>();
-
-                        let snippet = convert_list_to_string(list);
-
-                        if no_color {
-                            println!("{}", snippet);
-                        } else {
-                            write_to_stdio(snippet.as_str());
-                        }
-                    }
-                    Err(err) => eprint_and_exit(err.to_string()),
+            if response.is_success() {
+                match response.json::<Vec<T>>() {
+                    Ok(res) => Ok(res),
+                    Err(err) => Err(err.to_string()),
                 }
             } else {
-                eprint_and_exit(format!("{}", status));
+                Err(response.status().to_string())
             }
         }
         // usually network error
-        Err(err) => eprint_and_exit(err.to_string()),
-    };
-}
-
-pub async fn search(query: &str, no_color: bool) {
-    let url = format!("http://bropages.org/search/{}.json", query);
-
-    match reqwest::get(&url).await {
-        Ok(response) => {
-            let status = response.status();
-
-            if status.as_str() == "200" {
-                match response.json::<Vec<BroSearchResponse>>().await {
-                    Ok(res) => {
-                        let list = res.iter().map(|item| &item.cmd).collect::<Vec<&String>>();
-
-                        let total = list.len();
-
-                        let snippet = format!(
-                            "# There {} total '{}' results for the term '{}':\n\n{}",
-                            if total > 1 { "are" } else { "is" },
-                            total,
-                            query,
-                            convert_list_to_string(list)
-                        );
-
-                        if no_color {
-                            println!("{}", snippet);
-                        } else {
-                            write_to_stdio(snippet.as_str());
-                        }
-                    }
-                    Err(err) => eprint_and_exit(err.to_string()),
-                }
-            } else {
-                eprint_and_exit(format!("{}", status));
-            }
-        }
-        // usually network error
-        Err(err) => eprint_and_exit(err.to_string()),
-    };
-}
-
-pub fn write_to_stdio(snippet: &str) {
-    let mut final_string_to_print = String::new();
-    use syntect::{
-        easy::HighlightLines,
-        highlighting::{Style, ThemeSet},
-        parsing::SyntaxSet,
-        util::{as_24_bit_terminal_escaped, LinesWithEndings},
-    };
-    // Available themes:
-    // base16-ocean.dark
-    // base16-eighties.dark
-    // base16-mocha.dark
-    // base16-ocean.light
-    // InspiredGitHub
-    // Solarized (dark)
-    // Solarized (light)
-
-    let syntax_set = SyntaxSet::load_defaults_newlines();
-    let theme_set = ThemeSet::load_defaults();
-
-    let syntax = syntax_set
-        .find_syntax_by_extension("bash")
-        .expect("Unable to find syntax definition for `bash`");
-    let mut highlighter = HighlightLines::new(syntax, &theme_set.themes["base16-mocha.dark"]);
-
-    for line in LinesWithEndings::from(snippet) {
-        // LinesWithEndings enables use of newlines mode
-        let ranges: Vec<(Style, &str)> = highlighter.highlight(line, &syntax_set);
-        let escaped = as_24_bit_terminal_escaped(&ranges[..], false);
-        final_string_to_print.push_str(escaped.as_str())
+        Err(err) => Err(err.to_string()),
     }
+}
 
-    println!("{}", final_string_to_print.as_str());
+pub(crate) fn lookup(query: &str) {
+    match fetch::<BroLookupResponse>(format!("/{}.json", query)) {
+        Ok(mut response) => {
+            response.sort_by(|a, b| a.up.cmp(&b.up));
+
+            let list = response
+                .iter()
+                .map(|item| item.msg.clone())
+                .collect::<Vec<_>>();
+
+            let snippet = format_to_string(list);
+
+            print(snippet.as_bytes());
+        }
+        Err(err) => eprint_and_exit(err),
+    };
+}
+
+pub(crate) fn search(query: &str) {
+    match fetch::<BroSearchResponse>(format!("/search/{}.json", query)) {
+        Ok(res) => {
+            let list = res.iter().map(|item| item.cmd.clone()).collect::<Vec<_>>();
+
+            let total = list.len();
+
+            let snippet = format!(
+                "# Total {} matches for the term '{}':\n{}",
+                total,
+                query,
+                format_to_string(list)
+            );
+
+            print(snippet.as_bytes());
+        }
+        Err(err) => eprint_and_exit(err),
+    };
+}
+
+fn print(snippet: &[u8]) {
+    let color = unsafe { crate::COLOR };
+    let paging = unsafe {
+        if crate::PAGING {
+            bat::PagingMode::QuitIfOneScreen
+        } else {
+            bat::PagingMode::Never
+        }
+    };
+
+    let displayed = bat::PrettyPrinter::new()
+        .input_from_bytes(snippet)
+        .colored_output(color)
+        .line_numbers(true)
+        .language("bash")
+        .paging_mode(paging)
+        .print()
+        .unwrap_or(false);
+
+    if !displayed {
+        println!("{:?}", snippet);
+    }
 }

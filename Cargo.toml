@@ -1,6 +1,6 @@
 [package]
 name = "bropages"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["pjmp"]
 edition = "2018"
 keywords = ["bro", "bropages", "client", "tldr", "cheatsheet"]
@@ -15,12 +15,10 @@ Shows simple, concise examples for commands.
 """
 
 [dependencies]
-reqwest = {version = "0.10.3", default-features = false, features = ["json"]}
-tokio = {version = "0.2.13", features = ["macros"] }
+attohttpc = {version = "0.16.0", default-features = false, features = ["json", "tls"]}
+bat = {version = "0.16.0", default-features = false, features = ["paging", "regex-onig"]}
+clap = {version = "2.33.3", default-features = false, features = ["color", "suggestions"] }
 serde = {version = "1.0.48", features = ["derive"] }
-syntect = {version = "3.3.0", default-features = false, features = ["parsing", "assets", "dump-load"]}
-clap = {version = "2.33.0", features = ["default"] }
-colored = "1.9.3"
 
 [[bin]]
 path = "src/main.rs"

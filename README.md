@@ -44,5 +44,10 @@ ARGS:
             Command to lookup
 ```
 
-### TODO:
+### Note:
+
+- This is an unofficial rust port of [ruby bropages](https://rubygems.org/gems/bropages).
+- I don't have any intentions to add the `add`, `no`/`...no` or `thanks` commands.
+
+### TODO
  - [ ] Cache results ?
