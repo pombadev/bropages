@@ -1,16 +1,9 @@
 mod bro;
 mod cli;
-
-pub(crate) static mut COLOR: bool = true;
-pub(crate) static mut PAGING: bool = true;
+mod config;
 
 fn main() {
     let cmd = cli::new().get_matches();
-
-    if !cmd.is_present("search") && !cmd.is_present("query") {
-        cli::print_help();
-        return;
-    }
 
     let no_color = cmd.is_present("no-color");
     let search = cmd.is_present("search");
@@ -19,13 +12,13 @@ fn main() {
 
     if no_color {
         unsafe {
-            COLOR = false;
+            config::COLOR = false;
         }
     }
 
     if no_paging {
         unsafe {
-            PAGING = false;
+            config::PAGING = false;
         }
     }
 

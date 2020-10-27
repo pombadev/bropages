@@ -105,9 +105,9 @@ pub(crate) fn search(query: &str) {
 }
 
 fn print(snippet: &[u8]) {
-    let color = unsafe { crate::COLOR };
+    let color = unsafe { crate::config::COLOR };
     let paging = unsafe {
-        if crate::PAGING {
+        if crate::config::PAGING {
             bat::PagingMode::QuitIfOneScreen
         } else {
             bat::PagingMode::Never

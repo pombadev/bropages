@@ -1,7 +1,7 @@
 use clap::{crate_description, crate_name, crate_version, App, AppSettings, Arg};
 
-pub fn new() -> App<'static, 'static> {
-    let mut global_settings = vec![AppSettings::UnifiedHelpMessage];
+pub(crate) fn new() -> App<'static, 'static> {
+    let mut global_settings = vec![AppSettings::ArgRequiredElseHelp];
 
     let show_color = if std::env::var_os("NO_COLOR").is_none() {
         AppSettings::ColoredHelp
@@ -31,11 +31,10 @@ pub fn new() -> App<'static, 'static> {
 
         Arg::with_name("no-paging")
             .long("no-paging")
-            .help("Control piping of the output through a pager")
+            .help("Disable piping of the output through a pager")
     ])
 }
 
-pub fn print_help() {
-    new().print_help().unwrap();
-    println!("\n");
+pub(crate) fn print_help() {
+    let _ = new().print_help();
 }
