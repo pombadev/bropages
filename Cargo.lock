@@ -127,6 +127,7 @@ dependencies = [
  "bat",
  "clap",
  "serde",
+ "url",
 ]
 
 [[package]]

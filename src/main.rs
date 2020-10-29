@@ -28,6 +28,10 @@ fn main() {
                 cli::print_help();
             }
             Some(val) => {
+                if val.is_empty() || val.trim().is_empty() {
+                    return println!("Query cannot be empty, please input something.\nEg: bro tar");
+                }
+
                 if search {
                     bro::search(val);
                 } else if lookup {

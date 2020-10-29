@@ -37,4 +37,5 @@ pub(crate) fn new() -> App<'static, 'static> {
 
 pub(crate) fn print_help() {
     let _ = new().print_help();
+    println!();
 }

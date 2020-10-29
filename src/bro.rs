@@ -1,5 +1,7 @@
-use serde::{Deserialize, Serialize};
 use std::{env, process};
+
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use url::Url;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct BroLookupResponse {
@@ -46,8 +48,16 @@ fn eprint_and_exit(msg: String) {
     process::exit(1);
 }
 
-fn fetch<T: serde::de::DeserializeOwned>(path: String) -> Result<Vec<T>, String> {
-    let host = env::var("BROPAGES_BASE_URL").unwrap_or_else(|_| "http://bropages.org".to_string());
+fn fetch<T: DeserializeOwned>(path: String) -> Result<Vec<T>, String> {
+    let maybe_url = env::var("BROPAGES_BASE_URL");
+
+    if let Ok(url) = &maybe_url {
+        if let Err(_) = Url::parse(url.as_str()) {
+            return Err("Invalid URL".into());
+        }
+    }
+
+    let host = &maybe_url.unwrap_or_else(|_| "http://bropages.org".into());
     let url = format!("{}{}", host, path);
 
     match attohttpc::get(url).send() {

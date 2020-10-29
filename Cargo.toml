@@ -19,6 +19,7 @@ attohttpc = {version = "0.16.0", default-features = false, features = ["json", "
 bat = {version = "0.16.0", default-features = false, features = ["paging", "regex-onig"]}
 clap = {version = "2.33.3", default-features = false, features = ["color", "suggestions"] }
 serde = {version = "1.0.48", features = ["derive"] }
+url = "2.1.1"
 
 [[bin]]
 path = "src/main.rs"
