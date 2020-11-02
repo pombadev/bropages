@@ -5,9 +5,8 @@ mod config;
 fn main() {
     let cmd = cli::new().get_matches();
 
+    let is_search = cmd.is_present("search");
     let no_color = cmd.is_present("no-color");
-    let search = cmd.is_present("search");
-    let lookup = cmd.is_present("query");
     let no_paging = cmd.is_present("no-paging");
 
     if no_color {
@@ -22,22 +21,20 @@ fn main() {
         }
     }
 
-    if search || lookup {
-        return match cmd.value_of("query") {
-            None => {
-                cli::print_help();
+    match cmd.value_of("query") {
+        None => {
+            cli::print_help();
+        }
+        Some(val) => {
+            if val.trim().is_empty() {
+                return println!("Query cannot be empty, please input something.\nEg: bro tar");
             }
-            Some(val) => {
-                if val.is_empty() || val.trim().is_empty() {
-                    return println!("Query cannot be empty, please input something.\nEg: bro tar");
-                }
 
-                if search {
-                    bro::search(val);
-                } else if lookup {
-                    bro::lookup(val);
-                }
+            if is_search {
+                bro::search(val);
+            } else {
+                bro::lookup(val);
             }
-        };
-    }
+        }
+    };
 }

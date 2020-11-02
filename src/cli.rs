@@ -20,10 +20,10 @@ pub(crate) fn new() -> App<'static, 'static> {
             .help("Command to lookup"),
 
         Arg::with_name("search")
-            .short("l")
-            .long("lookup")
-            .help("Lookup an entry, bro, or just call bro")
-            .long_help("Lookup an entry, bro, or just call bro\nThis looks up entries in the http://bropages.org database."),
+            .short("s")
+            .long("search")
+            .help("Search if provided query exist in the database")
+            .long_help("Search if provided query exist in the database\nThis searches for entries in the http://bropages.org database"),
 
             Arg::with_name("no-color")
                 .long("no-color")

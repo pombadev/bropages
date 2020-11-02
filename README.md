@@ -23,9 +23,9 @@ cargo install bropages
 ### Available options
 ```
 USAGE:
-    bro [OPTIONS] [query]
+    bro [FLAGS] [query]
 
-OPTIONS:
+FLAGS:
     -h, --help         
             Prints help information
 
@@ -33,11 +33,11 @@ OPTIONS:
             Disable colored output
 
         --no-paging    
-            Control piping of the output through a pager
+            Disable piping of the output through a pager
 
-    -l, --lookup       
-            Lookup an entry, bro, or just call bro
-            This looks up entries in the http://bropages.org database.
+    -s, --search       
+            Search if provided query exist in the database
+            This searches for entries in the http://bropages.org database
     -V, --version      
             Prints version information
 
