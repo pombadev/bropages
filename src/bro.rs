@@ -39,7 +39,7 @@ struct BroSearchResponse {
 }
 
 #[derive(Debug, Default)]
-pub struct Config {
+struct Config {
     no_color: bool,
     no_paging: bool,
     theme: String,
