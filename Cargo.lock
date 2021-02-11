@@ -44,9 +44,9 @@ dependencies = [
 
 [[package]]
 name = "attohttpc"
-version = "0.16.0"
+version = "0.16.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1082810677916862c7704351dfe4696a837aaf34da0dd6431abc60783e71ee8f"
+checksum = "ba5b30bf3a0aead269fd5dd69b385a3e90c2b55f4f215d1bdf52c3883f5fa7fa"
 dependencies = [
  "http",
  "log",
@@ -83,9 +83,9 @@ checksum = "3441f0f7b02788e948e47f457ca01f1d7e6d92c693bc132c22b087d3141c03ff"
 
 [[package]]
 name = "bat"
-version = "0.16.0"
+version = "0.17.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ff3ef95bb0870ec03587b42a8f972902333d52f699d5d78ddfa6d5c19bb6276a"
+checksum = "df1e36a14d9603f9799def62aebb9dfece7e1b364aaaa8eba856e64bce1141c5"
 dependencies = [
  "ansi_colours",
  "ansi_term 0.12.1",
@@ -121,13 +121,12 @@ checksum = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
 
 [[package]]
 name = "bropages"
-version = "0.5.0"
+version = "1.0.0"
 dependencies = [
  "attohttpc",
  "bat",
  "clap",
  "serde",
- "url",
 ]
 
 [[package]]
@@ -195,16 +194,15 @@ dependencies = [
 
 [[package]]
 name = "console"
-version = "0.12.0"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c0b1aacfaffdbff75be81c15a399b4bedf78aaefe840e8af1d299ac2ade885d2"
+checksum = "a50aab2529019abfabfa93f1e6c41ef392f91fbf179b347a7e96abb524884a08"
 dependencies = [
  "encode_unicode",
  "lazy_static",
  "libc",
  "regex",
  "terminal_size",
- "termios",
  "unicode-width",
  "winapi",
  "winapi-util",
@@ -647,9 +645,9 @@ checksum = "c36fa947111f5c62a733b652544dd0016a43ce89619538a8ef92724a6f501a20"
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.9"
+version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6c09721c6781493a2a492a96b5a5bf19b65917fe6728884e7c44dd0c60ca3435"
+checksum = "1e0704ee1a7e00d7bb417d0770ea303c1bccbabf0ef1667dae92b5967f5f8a71"
 dependencies = [
  "unicode-xid",
 ]
@@ -811,18 +809,18 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.104"
+version = "1.0.123"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "414115f25f818d7dfccec8ee535d76949ae78584fc4f79a6f45a904bf8ab4449"
+checksum = "92d5161132722baa40d802cc70b15262b98258453e85e5d1d365c757c73869ae"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.104"
+version = "1.0.123"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "128f9e303a5a29922045a830221b8f78ec74a5f544944f3d5984f8ec3895ef64"
+checksum = "9391c295d64fc0abb2c556bad848f33cb8296276b1ad2677d1ae1ace4f258f31"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -872,9 +870,9 @@ checksum = "8ea5119cdb4c55b55d432abb513a0429384878c15dde60cc77b1c99de1a95a6a"
 
 [[package]]
 name = "syn"
-version = "1.0.16"
+version = "1.0.60"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "123bd9499cfb380418d509322d7a6d52e5315f064fe4b3ad18a53d6b92c07859"
+checksum = "c700597eca8a5a762beb35753ef6b94df201c81cca676604f547495a0d7f0081"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -925,15 +923,6 @@ checksum = "9a14cd9f8c72704232f0bfc8455c0e861f0ad4eb60cc9ec8a170e231414c1e13"
 dependencies = [
  "libc",
  "winapi",
-]
-
-[[package]]
-name = "termios"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "411c5bf740737c7918b8b1fe232dca4dc9f8e754b8ad5e20966814001ed0ac6b"
-dependencies = [
- "libc",
 ]
 
 [[package]]

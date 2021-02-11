@@ -23,24 +23,37 @@ cargo install bropages
 ### Available options
 ```
 USAGE:
-    bro [FLAGS] [query]
+    bro [FLAGS] [OPTIONS] [query]
 
 FLAGS:
-    -h, --help         
+    -h, --help           
             Prints help information
 
-        --no-color     
+        --list-themes    
+            Display a list of supported themes for syntax highlighting.
+
+        --no-color       
             Disable colored output
 
-        --no-paging    
+        --no-paging      
             Disable piping of the output through a pager
 
-    -s, --search       
+    -s, --search         
             Search if provided query exist in the database
             This searches for entries in the http://bropages.org database
-    -V, --version      
+    -V, --version        
             Prints version information
 
+
+OPTIONS:
+    -t, --theme <theme>    
+            Set the theme for syntax highlighting. Use '--list-themes' to see all available themes. [default:
+            OneHalfDark]  [possible values: 1337, Coldark-Cold, Coldark-Dark,
+            DarkNeon, Dracula, GitHub, Monokai Extended, Monokai Extended Bright,
+            Monokai Extended Light, Monokai Extended Origin, Nord, OneHalfDark,
+            OneHalfLight, Solarized (dark), Solarized (light), Sublime Snazzy,
+            TwoDark, ansi-dark, ansi-light, base16, base16-256, gruvbox,
+            gruvbox-light, gruvbox-white, zenburn]
 
 ARGS:
     <query>    
