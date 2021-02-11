@@ -26,6 +26,8 @@ pub(crate) fn new() -> App<'static, 'static> {
                 .short("t")
                 .takes_value(true)
                 .default_value("OneHalfDark")
+                // TODO: Get this list from `bat::assets::HighlightingAssets::from_binary().themes()`
+                // I'm not strong enough to fight the borrow checker.
                 .possible_values(&[
                     "1337",
                     "Coldark-Cold",
