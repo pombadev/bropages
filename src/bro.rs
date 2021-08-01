@@ -118,23 +118,17 @@ impl App {
             let splits = curr.split('\n');
 
             let next = splits
-                .enumerate()
-                .filter_map(|(index, item)| {
+                .filter_map(|item| {
                     if item.is_empty() {
                         return None;
                     }
 
                     let inner_next;
 
-                    // dont append and or prepend newline(s) if current item is the first line it looks jarring.
-                    if index == 0 {
-                        inner_next = String::from(item);
+                    if item.starts_with('#') {
+                        inner_next = format!("\n{}", item);
                     } else {
-                        if item.starts_with('#') {
-                            inner_next = format!("\n{}", item);
-                        } else {
-                            inner_next = format!("\n{}\n", item);
-                        }
+                        inner_next = format!("\n{}\n", item);
                     }
 
                     Some(inner_next)
