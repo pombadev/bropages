@@ -1,6 +1,6 @@
 [package]
 name = "bropages"
-version = "1.1.0"
+version = "1.1.2"
 authors = ["pjmp"]
 edition = "2018"
 keywords = ["bro", "bropages", "tldr", "cheatsheet"]

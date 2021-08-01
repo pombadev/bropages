@@ -1,8 +1,10 @@
 use std::{env, process, thread, time};
 
 use bat::{PagingMode, PrettyPrinter};
-use clap::{crate_description, crate_name, crate_version, App, AppSettings, Arg};
+use clap::{crate_description, crate_name, App, AppSettings, Arg};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
+
+const VERSION_STRING: &'static str = include_str!(concat!(env!("OUT_DIR"), "/version"));
 
 // snippets taken from: https://google.github.io/styleguide/shellguide.html
 const BASH_SYNTAX_DEMO: &str = r#"#!/usr/bin/env sh
@@ -79,11 +81,9 @@ impl Cli {
 
         let themes = themes.themes().collect::<Vec<_>>();
 
-        let version = format!("v{}-{}", crate_version!(), env!("GIT_HASH"));
-
         let app = App::new(crate_name!())
         .global_settings(&global_settings[..])
-        .version(version.as_str())
+        .version(VERSION_STRING)
         .about(crate_description!())
         .args(&[
             Arg::with_name("query")
