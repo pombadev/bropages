@@ -99,7 +99,7 @@ impl Cli {
                 .short("t")
                 .takes_value(true)
                 .possible_values(&themes[..])
-                .help("Set the theme for syntax highlighting. Use '--list-themes' to see all available themes.")
+                .help("Set the theme for syntax highlighting, default is `OneHalfDark`. Use '--list-themes' to see all available themes.")
                 .conflicts_with_all(&["list-themes"]),
 
             Arg::with_name("search")
