@@ -18,9 +18,9 @@ build = "build.rs"
 
 [dependencies]
 attohttpc = {version = "0.17.0", default-features = false, features = ["json", "tls"]}
-bat = {version = "0.18.2", default-features = false, features = ["paging", "regex-onig"]}
+bat = {version = "0.18.3", default-features = false, features = ["paging", "regex-onig"]}
 clap = {version = "2.33.3", default-features = false, features = ["color", "suggestions"] }
-serde = {version = "1.0.126", features = ["derive"] }
+serde = {version = "1.0.130", features = ["derive"] }
 
 [[bin]]
 path = "src/main.rs"

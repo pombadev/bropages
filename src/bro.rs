@@ -4,7 +4,7 @@ use bat::{PagingMode, PrettyPrinter};
 use clap::{crate_description, crate_name, App, AppSettings, Arg};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
-const VERSION_STRING: &'static str = include_str!(concat!(env!("OUT_DIR"), "/version"));
+const VERSION_STRING: &str = include_str!(concat!(env!("OUT_DIR"), "/version"));
 
 // snippets taken from: https://google.github.io/styleguide/shellguide.html
 const BASH_SYNTAX_DEMO: &str = r#"#!/usr/bin/env sh
