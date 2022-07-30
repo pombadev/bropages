@@ -11,7 +11,7 @@ fn main() {
 
     fs::write(
         Path::new(&env::var("OUT_DIR").unwrap()).join("version"),
-        version,
+        version.trim(),
     )
     .unwrap();
 }

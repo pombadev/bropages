@@ -1,32 +1,34 @@
 [package]
-name = "bropages"
-version = "1.1.2"
 authors = ["pjmp"]
-edition = "2018"
-keywords = ["bro", "bropages", "tldr", "cheatsheet"]
-categories = ["command-line-utilities", "command-line-interface"]
-readme = "README.md"
-license = "MIT"
-homepage = "https://github.com/pjmp/bropages"
-repository = "https://github.com/pjmp/bropages"
+categories = ["command-line-utilities"]
 description = """
 Highly readable supplement to man pages.
 Shows simple, concise examples for commands.
 """
+edition = "2021"
+homepage = "https://github.com/pjmp/bropages"
+keywords = ["bro", "bropages", "tldr", "cheatsheet"]
+license = "MIT"
+name = "bropages"
+readme = "README.md"
+repository = "https://github.com/pjmp/bropages"
+resolver = "2"
+version = "1.3.0"
 
 build = "build.rs"
 
 [dependencies]
-attohttpc = {version = "0.17.0", default-features = false, features = ["json", "tls"]}
-bat = {version = "0.18.3", default-features = false, features = ["paging", "regex-onig"]}
-clap = {version = "2.33.3", default-features = false, features = ["color", "suggestions"] }
-serde = {version = "1.0.130", features = ["derive"] }
+attohttpc = {version = "0.19.1", default-features = false, features = ["json", "tls"]}
+bat = {version = "0.21.0", default-features = false, features = ["paging", "regex-onig"]}
+clap = {version = "3.2.16", default-features = false, features = ["std", "suggestions"]}
+serde = {version = "1.0.140", features = ["derive"]}
 
 [[bin]]
-path = "src/main.rs"
 name = "bro"
+path = "src/main.rs"
 
 [profile.release]
-opt-level = 3
 lto = true
+opt-level = 3
 panic = 'abort'
+strip = true

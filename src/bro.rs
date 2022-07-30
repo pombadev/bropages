@@ -1,7 +1,7 @@
-use std::{env, process, thread, time};
+use std::{env, process};
 
 use bat::{PagingMode, PrettyPrinter};
-use clap::{crate_description, crate_name, App, AppSettings, Arg};
+use clap::{App, Arg, ArgAction};
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 const VERSION_STRING: &str = include_str!(concat!(env!("OUT_DIR"), "/version"));
@@ -29,21 +29,20 @@ if ! do_something; then
 fi
 "#;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 struct BroLookupResponse {
     cmd: String,
     msg: String,
     up: i32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 struct BroSearchResponse {
     cmd: String,
 }
 
 pub struct Cli {
     list_themes: bool,
-    no_color: bool,
     no_paging: bool,
     query: String,
     search: bool,
@@ -67,64 +66,46 @@ impl Cli {
     }
 
     fn new() -> Self {
-        let mut global_settings = vec![AppSettings::ArgRequiredElseHelp];
-
-        let show_color = if env::var_os("NO_COLOR").is_none() {
-            AppSettings::ColoredHelp
-        } else {
-            AppSettings::ColorNever
-        };
-
-        global_settings.push(show_color);
-
         let themes = bat::assets::HighlightingAssets::from_binary();
 
         let themes = themes.themes().collect::<Vec<_>>();
 
-        let app = App::new(crate_name!())
-        .global_settings(&global_settings[..])
+        let cmd = App::new(env!("CARGO_PKG_NAME"))
         .version(VERSION_STRING)
-        .about(crate_description!())
+        .about(env!("CARGO_PKG_DESCRIPTION"))
+        .arg_required_else_help(true)
         .args(&[
             Arg::with_name("query")
+                .required(true)
                 .help("Command to lookup"),
 
             Arg::with_name("list-themes")
                 .long("list-themes")
                 .help("Display a list of supported themes for syntax highlighting.")
-                .conflicts_with_all(&["theme", "search", "query"]),
+                .conflicts_with_all(&["theme", "search", "query", "no-paging"]),
 
             Arg::with_name("theme")
                 .long("theme")
-                .short("t")
+                .short('t')
                 .takes_value(true)
                 .possible_values(&themes[..])
                 .help("Set the theme for syntax highlighting, default is `OneHalfDark`. Use '--list-themes' to see all available themes.")
                 .conflicts_with_all(&["list-themes"]),
 
             Arg::with_name("search")
-                .short("s")
+                .short('s')
                 .long("search")
                 .help("Search if provided query exist in the database")
-                .long_help("Search if provided query exist in the database\nThis searches for entries in the http://bropages.org database")
-                .takes_value(false),
-
-            Arg::with_name("no-color")
-                .long("no-color")
-                .takes_value(false)
-                .help("Disable colored output"),
+                .long_help("Search if provided query exist in the database\nThis searches for entries in the http://bropages.org database"),
 
             Arg::with_name("no-paging")
                 .long("no-paging")
-                .takes_value(false)
+                .action(ArgAction::SetTrue)
                 .help("Disable piping of the output through a pager")
-        ]);
-
-        let cmd = app.get_matches();
+        ]).get_matches();
 
         Self {
             list_themes: cmd.is_present("list-themes"),
-            no_color: cmd.is_present("no-color"),
             no_paging: cmd.is_present("no-paging"),
             query: String::from(cmd.value_of("query").unwrap_or_default()),
             search: cmd.is_present("search"),
@@ -133,9 +114,9 @@ impl Cli {
         }
     }
 
-    fn format_to_string(list: Vec<String>) -> String {
-        list.iter().fold(String::new(), |mut init, curr| {
-            let splits = curr.split('\n');
+    fn format_to_string(list: &[String]) -> String {
+        list.iter().fold(String::new(), |mut init, current| {
+            let splits = current.split('\n');
 
             let next = splits
                 .filter_map(|item| {
@@ -143,13 +124,11 @@ impl Cli {
                         return None;
                     }
 
-                    let inner_next;
-
-                    if item.starts_with('#') {
-                        inner_next = format!("\n{}", item);
+                    let inner_next = if item.starts_with('#') {
+                        format!("\n{}", item)
                     } else {
-                        inner_next = format!("\n{}\n", item);
-                    }
+                        format!("\n{}\n", item)
+                    };
 
                     Some(inner_next)
                 })
@@ -161,14 +140,17 @@ impl Cli {
         })
     }
 
-    fn eprint_and_exit(msg: String) {
+    fn eprint_and_exit(msg: &str) {
         eprintln!("Unable to find because of:\n  - {}", msg);
         process::exit(1);
     }
 
-    fn fetch<T: DeserializeOwned>(path: String) -> Result<Vec<T>, String> {
-        let maybe_url = env::var("BROPAGES_BASE_URL");
-        let host = &maybe_url.unwrap_or_else(|_| "http://bropages.org".into());
+    fn fetch<T: DeserializeOwned>(path: &str) -> Result<Vec<T>, String> {
+        let host = match env::var("BROPAGES_BASE_URL") {
+            Ok(host) => host,
+            Err(_) => "http://bropages.org".into(),
+        };
+
         let url = format!("{}{}", host, path);
 
         match attohttpc::get(url).send() {
@@ -188,7 +170,7 @@ impl Cli {
     }
 
     fn lookup(&self) {
-        match Self::fetch::<BroLookupResponse>(format!("/{}.json", &self.query)) {
+        match Self::fetch::<BroLookupResponse>(&format!("/{}.json", &self.query)) {
             Ok(mut response) => {
                 response.sort_by(|a, b| a.up.cmp(&b.up));
 
@@ -197,16 +179,16 @@ impl Cli {
                     .map(|item| item.msg.clone())
                     .collect::<Vec<_>>();
 
-                let snippet = Self::format_to_string(list);
+                let snippet = Self::format_to_string(&list);
 
                 self.print(snippet.as_bytes());
             }
-            Err(err) => Self::eprint_and_exit(err),
+            Err(err) => Self::eprint_and_exit(&err),
         };
     }
 
     fn search(&self) {
-        match Self::fetch::<BroSearchResponse>(format!("/search/{}.json", &self.query)) {
+        match Self::fetch::<BroSearchResponse>(&format!("/search/{}.json", &self.query)) {
             Ok(res) => {
                 let list = res.iter().map(|item| item.cmd.clone()).collect::<Vec<_>>();
 
@@ -216,29 +198,28 @@ impl Cli {
                     "# Total {} matches for the term '{}':\n{}",
                     total,
                     &self.query,
-                    Self::format_to_string(list)
+                    Self::format_to_string(&list)
                 );
 
                 self.print(snippet.as_bytes());
             }
-            Err(err) => Self::eprint_and_exit(err),
+            Err(err) => Self::eprint_and_exit(&err),
         };
     }
 
     fn print(&self, snippet: &[u8]) {
-        let color = !self.no_color;
-        let paging = if !self.no_paging {
-            PagingMode::QuitIfOneScreen
-        } else {
+        let paging = if self.no_paging {
             PagingMode::Never
+        } else {
+            PagingMode::QuitIfOneScreen
         };
 
         let displayed = PrettyPrinter::new()
             .input_from_bytes(snippet)
-            .colored_output(color)
             .line_numbers(true)
             .language("bash")
             .theme(&self.theme)
+            .colored_output(env::var_os("NO_COLOR").is_none())
             .paging_mode(paging)
             .print()
             .unwrap_or(false);
@@ -260,9 +241,9 @@ impl Cli {
                 .language("bash")
                 .theme(theme)
                 .grid(true)
+                .line_numbers(true)
                 .print();
 
-            thread::sleep(time::Duration::from_secs(1));
             println!();
         }
     }
