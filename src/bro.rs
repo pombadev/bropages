@@ -1,8 +1,8 @@
-use std::{env, process};
+use std::{env, error::Error, process};
 
 use bat::{PagingMode, PrettyPrinter};
 use clap::{App, Arg, ArgAction};
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use ureq::serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 const VERSION_STRING: &str = include_str!(concat!(env!("OUT_DIR"), "/version"));
 
@@ -30,6 +30,7 @@ fi
 "#;
 
 #[derive(Serialize, Deserialize)]
+#[serde(crate = "ureq::serde")]
 struct BroLookupResponse {
     cmd: String,
     msg: String,
@@ -37,6 +38,7 @@ struct BroLookupResponse {
 }
 
 #[derive(Serialize, Deserialize)]
+#[serde(crate = "ureq::serde")]
 struct BroSearchResponse {
     cmd: String,
 }
@@ -145,28 +147,15 @@ impl Cli {
         process::exit(1);
     }
 
-    fn fetch<T: DeserializeOwned>(path: &str) -> Result<Vec<T>, String> {
-        let host = match env::var("BROPAGES_BASE_URL") {
-            Ok(host) => host,
-            Err(_) => "http://bropages.org".into(),
-        };
+    fn fetch<T: DeserializeOwned>(path: &str) -> Result<Vec<T>, Box<dyn Error>> {
+        let host = option_env!("BROPAGES_BASE_URL").unwrap_or_else(|| "http://bropages.org");
 
         let url = format!("{}{}", host, path);
 
-        match attohttpc::get(url).send() {
-            Ok(response) => {
-                if response.is_success() {
-                    match response.json::<Vec<T>>() {
-                        Ok(res) => Ok(res),
-                        Err(err) => Err(err.to_string()),
-                    }
-                } else {
-                    Err(response.status().to_string())
-                }
-            }
-            // usually network error
-            Err(err) => Err(err.to_string()),
-        }
+        ureq::get(&url)
+            .call()?
+            .into_json::<Vec<T>>()
+            .map_err(Into::into)
     }
 
     fn lookup(&self) {
@@ -183,7 +172,7 @@ impl Cli {
 
                 self.print(snippet.as_bytes());
             }
-            Err(err) => Self::eprint_and_exit(&err),
+            Err(err) => Self::eprint_and_exit(&err.to_string()),
         };
     }
 
@@ -203,7 +192,7 @@ impl Cli {
 
                 self.print(snippet.as_bytes());
             }
-            Err(err) => Self::eprint_and_exit(&err),
+            Err(err) => Self::eprint_and_exit(&err.to_string()),
         };
     }
 
