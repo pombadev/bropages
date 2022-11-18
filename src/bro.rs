@@ -1,7 +1,7 @@
 use std::{env, error::Error, process};
 
 use bat::{PagingMode, PrettyPrinter};
-use clap::{App, Arg, ArgAction};
+use clap::{Arg, ArgAction, Command};
 use ureq::serde::{de::DeserializeOwned, Deserialize, Serialize};
 
 const VERSION_STRING: &str = include_str!(concat!(env!("OUT_DIR"), "/version"));
@@ -72,47 +72,63 @@ impl Cli {
 
         let themes = themes.themes().collect::<Vec<_>>();
 
-        let cmd = App::new(env!("CARGO_PKG_NAME"))
+        let cmd = Command::new(env!("CARGO_PKG_NAME"))
         .version(VERSION_STRING)
         .about(env!("CARGO_PKG_DESCRIPTION"))
         .arg_required_else_help(true)
         .args(&[
-            Arg::with_name("query")
+            Arg::new("query")
                 .required(true)
+                .action(ArgAction::Set)
                 .help("Command to lookup"),
 
-            Arg::with_name("list-themes")
+            Arg::new("list-themes")
                 .long("list-themes")
+                .action(ArgAction::SetTrue)
                 .help("Display a list of supported themes for syntax highlighting.")
-                .conflicts_with_all(&["theme", "search", "query", "no-paging"]),
+                .conflicts_with_all(["theme", "search", "query", "no-paging"]),
 
-            Arg::with_name("theme")
+            Arg::new("theme")
                 .long("theme")
                 .short('t')
-                .takes_value(true)
-                .possible_values(&themes[..])
+                .action(ArgAction::Set)
+                // .value_parser(&themes[..])
                 .help("Set the theme for syntax highlighting, default is `OneHalfDark`. Use '--list-themes' to see all available themes.")
-                .conflicts_with_all(&["list-themes"]),
+                .conflicts_with_all(["list-themes"]),
 
-            Arg::with_name("search")
+            Arg::new("search")
                 .short('s')
                 .long("search")
+                .action(ArgAction::SetTrue)
                 .help("Search if provided query exist in the database")
                 .long_help("Search if provided query exist in the database\nThis searches for entries in the http://bropages.org database"),
 
-            Arg::with_name("no-paging")
+            Arg::new("no-paging")
                 .long("no-paging")
-                .action(ArgAction::SetTrue)
                 .help("Disable piping of the output through a pager")
         ]).get_matches();
 
+        let theme = match cmd.get_one::<String>("theme") {
+            Some(theme) => theme.clone(),
+            None => "OneHalfDark".into(),
+        };
+
+        let query = match cmd.get_one::<String>("query") {
+            Some(query) => query.clone(),
+            None => String::new(),
+        };
+
+        let list_themes = cmd.get_one::<bool>("list-themes").unwrap_or(&false);
+        let no_paging = cmd.get_one::<bool>("no-paging").unwrap_or(&false);
+        let search = cmd.get_one::<bool>("search").unwrap_or(&false);
+
         Self {
-            list_themes: cmd.is_present("list-themes"),
-            no_paging: cmd.is_present("no-paging"),
-            query: String::from(cmd.value_of("query").unwrap_or_default()),
-            search: cmd.is_present("search"),
-            theme: String::from(cmd.value_of("theme").unwrap_or("OneHalfDark")),
-            themes: themes.iter().map(|s| String::from(*s)).collect::<Vec<_>>(),
+            theme,
+            query,
+            list_themes: *list_themes,
+            no_paging: *no_paging,
+            search: *search,
+            themes: themes.iter().copied().map(String::from).collect::<Vec<_>>(),
         }
     }
 
