@@ -13,7 +13,7 @@ name = "bropages"
 readme = "README.md"
 repository = "https://github.com/pombadev/bropages"
 resolver = "2"
-version = "1.40.0"
+version = "1.40.1"
 
 [dependencies]
 bat = {version = "0.22.1", default-features = false, features = ["paging", "regex-onig"]}
