@@ -15,11 +15,9 @@ repository = "https://github.com/pombadev/bropages"
 resolver = "2"
 version = "1.40.0"
 
-build = "build.rs"
-
 [dependencies]
 bat = {version = "0.22.1", default-features = false, features = ["paging", "regex-onig"]}
-clap = {version = "4.0.26", default-features = false, features = [
+clap = {version = "4.0.29", default-features = false, features = [
     "error-context",
     "help",
     "std",
