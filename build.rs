@@ -7,20 +7,22 @@ use std::{
 fn main() {
     let mut version = format!("v{}", env!("CARGO_PKG_VERSION"));
 
-    if let Ok(out) = Command::new("git")
+    let out = Command::new("git")
         .args(["rev-parse", "--short", "HEAD"])
         .stdout(Stdio::piped())
         .output()
-    {
-        if let Ok(hash) = String::from_utf8(out.stdout) {
-            version.push('+');
-            version.push_str(hash.trim());
-        }
+        .ok()
+        .and_then(|output| String::from_utf8(output.stdout).ok())
+        .unwrap_or_default();
+
+    if !out.is_empty() {
+        version.push('+');
+        version.push_str(out.trim());
     }
 
     fs::write(
         Path::new(&env::var("OUT_DIR").expect("OUT_DIR to be defined")).join("version"),
-        version.trim(),
+        &version,
     )
     .unwrap_or_else(|err| panic!("create version file with: {version} failed because: {err}"));
 }

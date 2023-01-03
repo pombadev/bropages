@@ -143,9 +143,9 @@ impl Cli {
                     }
 
                     let inner_next = if item.starts_with('#') {
-                        format!("\n{}", item)
+                        format!("\n{item}")
                     } else {
-                        format!("\n{}\n", item)
+                        format!("\n{item}\n")
                     };
 
                     Some(inner_next)
@@ -159,14 +159,14 @@ impl Cli {
     }
 
     fn eprint_and_exit(msg: &str) {
-        eprintln!("Unable to find because of:\n  - {}", msg);
+        eprintln!("Unable to find because of:\n  - {msg}");
         process::exit(1);
     }
 
     fn fetch<T: DeserializeOwned>(path: &str) -> Result<Vec<T>, Box<dyn Error>> {
         let host = option_env!("BROPAGES_BASE_URL").unwrap_or_else(|| "http://bropages.org");
 
-        let url = format!("{}{}", host, path);
+        let url = format!("{host}{path}");
 
         ureq::get(&url)
             .call()?
@@ -239,7 +239,7 @@ impl Cli {
         let mut printer = PrettyPrinter::new();
 
         for theme in &self.themes {
-            println!("Theme: {}", theme);
+            println!("Theme: {theme}");
             let _ = printer
                 .input_from_bytes(BASH_SYNTAX_DEMO.as_bytes())
                 .colored_output(true)
