@@ -13,18 +13,18 @@ name = "bropages"
 readme = "README.md"
 repository = "https://github.com/pombadev/bropages"
 resolver = "2"
-version = "1.40.1"
+version = "1.41.0"
 
 [dependencies]
-bat = {version = "0.22.1", default-features = false, features = ["paging", "regex-onig"]}
-clap = {version = "4.0.29", default-features = false, features = [
+bat = {version = "0.23.0", default-features = false, features = ["paging", "regex-fancy"]}
+clap = {version = "4.4.3", default-features = false, features = [
     "error-context",
     "help",
     "std",
     "suggestions",
     "usage",
 ]}
-ureq = {version = "2.5.0", default-features = false, features = ["json"]}
+ureq = {version = "2.7.1", default-features = false, features = ["json"]}
 
 [[bin]]
 name = "bro"

@@ -1,3 +1,4 @@
+use std::env::consts;
 use std::{env, error::Error, process};
 
 use bat::{PagingMode, PrettyPrinter};
@@ -169,6 +170,17 @@ impl Cli {
         let url = format!("{host}{path}");
 
         ureq::get(&url)
+            .set(
+                "User-Agent",
+                format!(
+                    "{}/{} ({}, {}) ureq/2.7.1",
+                    env!("CARGO_PKG_NAME"),
+                    env!("CARGO_PKG_VERSION"),
+                    consts::OS,
+                    consts::ARCH,
+                )
+                .as_str(),
+            )
             .call()?
             .into_json::<Vec<T>>()
             .map_err(Into::into)
