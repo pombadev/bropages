@@ -106,6 +106,7 @@ impl Cli {
 
             Arg::new("no-paging")
                 .long("no-paging")
+                .action(ArgAction::SetTrue)
                 .help("Disable piping of the output through a pager")
         ]).get_matches();
 
