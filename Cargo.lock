@@ -107,7 +107,7 @@ checksum = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
 
 [[package]]
 name = "bropages"
-version = "1.41.0"
+version = "1.5.0"
 dependencies = [
  "bat",
  "clap",
